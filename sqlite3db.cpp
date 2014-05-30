@@ -237,7 +237,8 @@ Sqlite3Db::step() {
 							blen = r.length;
 							trunc = true;
 						}
-						memcpy(col,blob,blen);
+						r.rbytes = blen;		// Keep the actual blob size around
+						memcpy(col,blob,r.rbytes);	// Copy to user's buffer
 					} else	memset(col,0,r.length);
 				}
 				break;
