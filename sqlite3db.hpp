@@ -39,6 +39,24 @@ class Sqlite3Db {
 
 	std::vector<s_result>	rvec;		// Result vector (received columns)
 
+public:	class Blob {
+		Sqlite3Db&	db;		// Reference to the owning database
+		sqlite3_blob	*blob;		// sqlite3 blob object
+
+	public:	Blob(Sqlite3Db& database,sqlite3_blob *blob);
+	public:	~Blob();
+
+		inline const std::string& errormsg() { return db.errmsg; }
+		inline int error() { return db.status; }
+
+		inline size_t size();		// Size of the blob in bytes
+		bool read(void *buffer,size_t bytes,size_t offset);
+		bool write(const void *buffer,size_t bytes,size_t offset);
+#ifdef HAVE_BLOB_REOPEN
+		bool move(sqlite3_int64 new_rowid);
+#endif
+	};
+
 public:	Sqlite3Db();
 
 	bool open(const char *filename,bool readonly=false,bool create=false);
@@ -57,14 +75,14 @@ public:	Sqlite3Db();
 	bool qbind(double qv);				// Bind double to query
 	bool qbind(const char *qv);			// Bind text to query
 	bool qbind(const std::string& qv);		// Bind std::string to query (use only when qv does not change!)
-	bool qbind(const char *qblob,int nbytes);	// Bind blob to query
+	bool qbind(const void *qblob,int nbytes);	// Bind blob to query
 
 	void rbind(int& rv);				// Bind int result (3rd)
 	void rbind(sqlite3_int64& rv);			// Bind int64 result
 	void rbind(double& rv);				// Bind double result
 	void rbind(char *rv,unsigned maxbytes);		// Bind text result
 	void rbind(std::string& rv);			// Bind text to std::string object
-	void rbind(char *rblob,int maxbytes);		// Bind blob result
+	void rbind(void *rblob,int maxbytes);		// Bind blob result
 
 	unsigned rlength(void *loc);			// Length of returned result
 
@@ -79,8 +97,11 @@ public:	Sqlite3Db();
 	void rclear();					// Clear last prepared query & results (5th)
 
 	bool is_table(const char *table_name);		// Return true if table_name exists
-};
 
+	// Blobs
+
+	Blob *open_blob(const char *table,const char *column,sqlite3_int64 rowid,bool readonly=true);
+};
 
 #endif // SQLITE3_HPP
 

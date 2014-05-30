@@ -231,7 +231,7 @@ Sqlite3Db::step() {
 					
 					if ( !r.is_null ) {
 						void *blob = (void *) sqlite3_column_blob(stmt,rx);
-						int blen = sqlite3_column_bytes(stmt,rx);
+						unsigned blen = sqlite3_column_bytes(stmt,rx);
 
 						if ( r.length < blen ) {
 							blen = r.length;
@@ -316,7 +316,7 @@ Sqlite3Db::qbind(const std::string& qv) {
 }
 
 bool
-Sqlite3Db::qbind(const char *qblob,int nbytes) {
+Sqlite3Db::qbind(const void *qblob,int nbytes) {
 	status = sqlite3_bind_blob(stmt,++bindx,qblob,nbytes,0);
 	if ( status != SQLITE_OK )
 		errmsg = sqlite3_errmsg(sqldb);
@@ -381,7 +381,7 @@ Sqlite3Db::rbind(std::string& rv) {
 }
 
 void
-Sqlite3Db::rbind(char *qblob,int maxbytes) {
+Sqlite3Db::rbind(void *qblob,int maxbytes) {
 	s_result r;
 
 	r.type = RT_blob;
@@ -439,5 +439,120 @@ Sqlite3Db::is_table(const char *table_name) {
 xit:	rclear();
 	return r;
 }
+
+//////////////////////////////////////////////////////////////////////
+// Open a blob for read or read/write
+//////////////////////////////////////////////////////////////////////
+
+Sqlite3Db::Blob *
+Sqlite3Db::open_blob(const char *table,const char *column,sqlite3_int64 rowid,bool readonly) {
+	sqlite3_blob *sqblob = 0;
+
+	status = sqlite3_blob_open(sqldb,0,table,column,rowid,readonly ? 0 : 1,&sqblob);
+
+	switch ( status ) {
+	case SQLITE_OK :
+		break;
+	default :
+		errmsg = sqlite3_errmsg(sqldb);
+		return 0;
+	}
+
+	return new Blob(*this,sqblob);
+}
+
+//////////////////////////////////////////////////////////////////////
+// Blob constructor
+//////////////////////////////////////////////////////////////////////
+
+Sqlite3Db::Blob::Blob(Sqlite3Db &database,sqlite3_blob *sqblob) : db(database), blob(sqblob) {
+	db.status = SQLITE_OK;
+}
+
+//////////////////////////////////////////////////////////////////////
+// Blob destructor
+//////////////////////////////////////////////////////////////////////
+
+Sqlite3Db::Blob::~Blob() {
+
+	if ( blob ) {
+		db.status = sqlite3_blob_close(blob);
+		if ( db.status != SQLITE_OK )
+			db.errmsg = sqlite3_errmsg(db.sqldb);
+		blob = 0;
+	} else	db.status = SQLITE_OK;
+}
+
+//////////////////////////////////////////////////////////////////////
+// Return the size of the blob
+//////////////////////////////////////////////////////////////////////
+
+size_t
+Sqlite3Db::Blob::size() {
+	return static_cast<size_t>(sqlite3_blob_bytes(blob));
+}
+
+//////////////////////////////////////////////////////////////////////
+// Read from the blob
+//////////////////////////////////////////////////////////////////////
+
+bool
+Sqlite3Db::Blob::read(void *buffer,size_t bytes,size_t offset) {
+
+	db.status = sqlite3_blob_read(
+		blob,
+		buffer,
+		static_cast<int>(bytes),
+		static_cast<int>(offset)
+	);
+
+	if ( db.status != SQLITE_OK ) {
+		db.errmsg = sqlite3_errmsg(db.sqldb);
+		return false;
+	}
+
+	return true;
+}
+
+//////////////////////////////////////////////////////////////////////
+// Write to the blob
+//////////////////////////////////////////////////////////////////////
+
+bool
+Sqlite3Db::Blob::write(const void *buffer,size_t bytes,size_t offset) {
+
+	db.status = sqlite3_blob_write(
+		blob,
+		buffer,
+		static_cast<int>(bytes),
+		static_cast<int>(offset)
+	);
+
+	if ( db.status != SQLITE_OK ) {
+		db.errmsg = sqlite3_errmsg(db.sqldb);
+		return false;
+	}
+
+	return true;
+}
+
+//////////////////////////////////////////////////////////////////////
+// Move an open blob from the current rowid, to a new rowid
+//////////////////////////////////////////////////////////////////////
+
+#ifdef HAVE_BLOB_REOPEN
+bool
+Sqlite3Db::Blob::move(sqlite3_int64 new_rowid) {
+
+	db.status = sqlite3_blob_reopen(blob,new_rowid);
+
+	if ( db.status != SQLITE_OK ) {
+		db.errmsg = sqlite3_errmsg(db.sqldb);
+		return false;
+	}
+
+	return true;
+}
+#endif
 
 // End sqlite3db.cpp
