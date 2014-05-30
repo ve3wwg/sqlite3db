@@ -556,4 +556,37 @@ Sqlite3Db::Blob::move(sqlite3_int64 new_rowid) {
 }
 #endif
 
+bool
+Sqlite3Db::integrity_check() {
+	int is_ok;
+
+	if ( !prepare("pragma integrity_check") )
+		return false;
+
+	rbind(is_ok);
+
+	if ( step() != SQLITE_ROW )
+		return false;
+	return is_ok ? true : false;
+}
+
+bool
+Sqlite3Db::quick_check() {
+	int is_ok;
+
+	if ( !prepare("pragma quick_check") )
+		return false;
+
+	rbind(is_ok);
+
+	if ( step() != SQLITE_ROW )
+		return false;
+	return is_ok ? true : false;
+}
+
+bool
+Sqlite3Db::vacuum() {
+	return execute("vacuum") == SQLITE_DONE;
+}
+
 // End sqlite3db.cpp

@@ -96,7 +96,15 @@ public:	Sqlite3Db();
 
 	void rclear();					// Clear last prepared query & results (5th)
 
+	// Queries
+
 	bool is_table(const char *table_name);		// Return true if table_name exists
+
+	// Maintenance
+
+	bool vacuum();
+	bool integrity_check();
+	bool quick_check();
 
 	// Blobs
 
