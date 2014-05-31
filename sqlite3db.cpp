@@ -586,7 +586,7 @@ Sqlite3Db::quick_check() {
 
 bool
 Sqlite3Db::vacuum() {
-	return execute("vacuum") == SQLITE_DONE;
+	return execute("vacuum");
 }
 
 // End sqlite3db.cpp
