@@ -558,30 +558,32 @@ Sqlite3Db::Blob::move(sqlite3_int64 new_rowid) {
 
 bool
 Sqlite3Db::integrity_check() {
-	int is_ok;
+	char buf[40];
 
 	if ( !prepare("pragma integrity_check") )
 		return false;
 
-	rbind(is_ok);
+	rbind(buf,sizeof buf);
 
 	if ( step() != SQLITE_ROW )
 		return false;
-	return is_ok ? true : false;
+
+	return !strcasecmp(buf,"ok");
 }
 
 bool
 Sqlite3Db::quick_check() {
-	int is_ok;
+	char buf[40];
 
 	if ( !prepare("pragma quick_check") )
 		return false;
 
-	rbind(is_ok);
+	rbind(buf,sizeof buf);
 
 	if ( step() != SQLITE_ROW )
 		return false;
-	return is_ok ? true : false;
+
+	return !strcasecmp(buf,"ok");
 }
 
 bool
