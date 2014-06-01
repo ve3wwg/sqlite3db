@@ -313,7 +313,7 @@ Sqlite3Db::qbind(const char *qv) {
 
 bool
 Sqlite3Db::qbind(const std::string& qv) {
-	return sqlite3_bind_text(stmt,++bindx,qv.c_str(),-1,0);
+	return sqlite3_bind_text(stmt,++bindx,qv.c_str(),-1,0) == SQLITE_OK;
 }
 
 bool
