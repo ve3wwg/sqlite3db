@@ -66,8 +66,8 @@ public:	Sqlite3Db();
 	inline int error() { return status; }
 
 	bool execute(const char *sql);			// Query with no results
-
 	bool prepare(const char *sql);			// Perpare query (1st) with results..
+	inline bool is_prepared() { return stmt != 0; }	// Return true if we have a prepared statement
 
 	bool qreset();					// Allow rebinding for prepared query
 	bool qbind_null();				// Bind NULL to query (2nd)
