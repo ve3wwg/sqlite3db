@@ -95,6 +95,7 @@ Sqlite3Db::execute(const char *sql) {
 	bool ok, r = false;
 	int status;
 
+	rclear();
 	ok = prepare(sql);
 	if ( !ok )
 		goto xit;
@@ -110,9 +111,11 @@ Sqlite3Db::execute(const char *sql) {
 	case SQLITE_BUSY:
 	case SQLITE_ERROR:
 		r = false;
+		errmsg = sqlite3_errmsg(sqldb);
 		break;
 	case SQLITE_MISUSE:
 	default :
+		errmsg = sqlite3_errmsg(sqldb);
 		assert(0);
 	}
 
