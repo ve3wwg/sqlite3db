@@ -591,4 +591,11 @@ Sqlite3Db::vacuum() {
 	return execute("vacuum");
 }
 
+bool
+Sqlite3Db::qreset() {
+	bindx = 0;
+	needs_reset = false;
+	return sqlite3_clear_bindings(stmt) == SQLITE_OK;
+}
+
 // End sqlite3db.cpp

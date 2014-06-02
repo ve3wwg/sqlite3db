@@ -69,6 +69,7 @@ public:	Sqlite3Db();
 
 	bool prepare(const char *sql);			// Perpare query (1st) with results..
 
+	bool qreset();					// Allow rebinding for prepared query
 	bool qbind_null();				// Bind NULL to query (2nd)
 	bool qbind(int qv);				// Bind int to query
 	bool qbind(sqlite3_int64 qv);			// Bind int64 to query
