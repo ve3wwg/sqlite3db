@@ -101,6 +101,13 @@ public:	Sqlite3Db();
 
 	bool is_table(const char *table_name);		// Return true if table_name exists
 
+	// Pragmas
+
+	bool query_set_pragma(const char *pragma,const char *mode,std::string& result);
+
+	bool journal_mode(const char *mode,std::string& result);	// Query/Set journal mode
+	bool locking_mode(const char *mode,std::string& result);	// Query/Set locking mode
+
 	// Maintenance
 
 	bool vacuum();

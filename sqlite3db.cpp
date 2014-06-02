@@ -93,7 +93,6 @@ Sqlite3Db::prepare(const char *sql) {
 bool
 Sqlite3Db::execute(const char *sql) {
 	bool ok, r = false;
-	int status;
 
 	rclear();
 	ok = prepare(sql);
@@ -599,6 +598,40 @@ Sqlite3Db::qreset() {
 	bindx = 0;
 	needs_reset = false;
 	return sqlite3_clear_bindings(stmt) == SQLITE_OK;
+}
+
+bool
+Sqlite3Db::query_set_pragma(const char *pragma,const char *mode,std::string& result) {
+	std::string sql = "pragma ";
+	char res[1024];
+
+	result.clear();
+	sql += pragma;
+
+	if ( mode ) {
+		sql += " = ";
+		sql += mode;
+	}
+
+	if ( !prepare(sql.c_str()) )
+		return false;
+
+	rbind(res,sizeof res);
+	if ( step() != SQLITE_ROW )
+		return false;
+
+	result = res;
+	return true;
+}
+
+bool
+Sqlite3Db::journal_mode(const char *mode,std::string& result) {
+	return query_set_pragma("journal_mode",mode,result);
+}
+
+bool
+Sqlite3Db::locking_mode(const char *mode,std::string& result) {
+	return query_set_pragma("locking_mode",mode,result);
 }
 
 // End sqlite3db.cpp
