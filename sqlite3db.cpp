@@ -595,9 +595,13 @@ Sqlite3Db::vacuum() {
 
 bool
 Sqlite3Db::qreset() {
-	bindx = 0;
-	needs_reset = false;
-	return sqlite3_clear_bindings(stmt) == SQLITE_OK;
+	if ( stmt ) {
+		bindx = 0;
+		needs_reset = false;
+		status = SQLITE_OK;
+		return true;
+	} else
+		return false;
 }
 
 bool
