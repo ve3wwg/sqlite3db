@@ -12,6 +12,7 @@
 #include <vector>
 
 class Sqlite3Db {
+protected:
 	struct sqlite3		*sqldb;		// Sqlite3 database 
 	sqlite3_stmt		*stmt;		// Prepared statement
 	bool			needs_reset;	// True when prepared statement needs a reset
@@ -59,8 +60,8 @@ public:	class Blob {
 
 public:	Sqlite3Db();
 
-	bool open(const char *filename,bool readonly=false,bool create=false);
-	void close();
+	virtual bool open(const char *filename,bool readonly=false,bool create=false);
+	virtual void close();
 
 	inline const std::string& errormsg() { return errmsg; }
 	inline int error() { return status; }
