@@ -18,6 +18,7 @@ Sqlite3Db::Sqlite3Db() {
 	needs_reset = false;
 	bindx = 0;
 	trunc = false;
+	vfs_module_name = 0;
 }
 
 bool
@@ -35,7 +36,7 @@ Sqlite3Db::open(const char *filename,bool readonly,bool create) {
 			flags |= SQLITE_OPEN_CREATE;
 	}
 
-	status = sqlite3_open_v2(filename,&sqldb,flags,0);
+	status = sqlite3_open_v2(filename,&sqldb,flags,vfs_module_name);
 	if ( status != SQLITE_OK ) {
 		errmsg = sqlite3_errmsg(sqldb);
 		sqlite3_close(sqldb);

@@ -20,6 +20,7 @@ protected:
 	int			bindx;		// Bind index
 	int			status;		// Last status returned
 	std::string		errmsg;		// Error message for last error
+	const char		*vfs_module_name; // VFS Module name else 0
 
 	enum ResultType {
 		RT_int,
@@ -59,6 +60,8 @@ public:	class Blob {
 	};
 
 public:	Sqlite3Db();
+
+	inline void set_vfs(const char *vfs_modname)	{ vfs_module_name = vfs_modname; }
 
 	virtual bool open(const char *filename,bool readonly=false,bool create=false);
 	virtual void close();
