@@ -3,6 +3,8 @@
 #  Warren Gay ve3wwg	Sat Apr  5 08:47:58 2014
 ######################################################################
 
+-include Makefile.conf
+
 PREFIX	= /usr/local
 
 ARCH	= 
@@ -12,7 +14,7 @@ STD	= -std=gnu++0x
 GCOPTS	= -Wall -g -Os 
 GLIBS	= -lstdc++ -lc -lm 
 
-INCL	= -I.
+INCL	+= -I.
 
 CPPFLAGS = $(GOPTS) $(INCL) $(OPTIONS) $(INCL) $(DEFNS)
 CXXFLAGS = $(STD) $(GCOPTS) $(CPPFLAGS)
@@ -56,5 +58,7 @@ clean:
 
 distclean: clean
 	rm -f libsqlite3db.a testdb errs.t
+
+clobber: distclean
 
 # End sqlite3db/Makefile
