@@ -80,12 +80,16 @@ Sqlite3Db::prepare(const char *sql) {
 	bindx = 0;
 	rvec.clear();
 
-	status = sqlite3_prepare_v2(sqldb,sql,-1,&stmt,0);
-	if ( status != SQLITE_OK ) {
-		errmsg = sqlite3_errmsg(sqldb);
-		sqlite3_finalize(stmt);
-		stmt = 0;
-		return false;
+	{
+		int lcl_status = sqlite3_prepare_v2(sqldb,sql,-1,&stmt,0);
+		if ( lcl_status != SQLITE_OK ) {
+			std::string lcl_errmsg = sqlite3_errstr(lcl_status);
+			sqlite3_finalize(stmt);
+			stmt = 0;
+			status = lcl_status;
+			errmsg = lcl_errmsg;
+			return false;
+		}
 	}
 
 	return true;
