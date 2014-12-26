@@ -28,6 +28,26 @@ main(int argc,char **argv) {
 	}
 
 	//////////////////////////////////////////////////////////////
+	// Perform checks
+	//////////////////////////////////////////////////////////////
+
+	db.vacuum();
+
+	ok = db.quick_check();
+	if ( !ok ) {
+		fprintf(stderr,"%s: integrity_check()\n",
+			db.errormsg().c_str());
+		assert(ok);
+	}
+
+	ok = db.integrity_check();
+	if ( !ok ) {
+		fprintf(stderr,"%s: integrity_check()\n",
+			db.errormsg().c_str());
+		assert(ok);
+	}
+
+	//////////////////////////////////////////////////////////////
 	// If table xyzzy exists, drop it
 	//////////////////////////////////////////////////////////////
 
@@ -81,7 +101,7 @@ main(int argc,char **argv) {
 	unsigned count = db.rows_affected();
 	uint64_t rowid = db.last_rowid();
 
-	printf("Rows affected: %u, last_rowid %llu\n",count,rowid);
+	printf("Rows affected: %u, last_rowid %llu\n",count,(unsigned long long)rowid);
 
 	assert(count == 1);
 	assert(rowid == 1);
